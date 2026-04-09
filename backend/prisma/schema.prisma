@@ -1,0 +1,87 @@
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+generator erd {
+    provider = "prisma-erd-generator"
+}
+
+model User {
+    id              String   @id @default(uuid())
+    mail            String
+    password        String
+    image           String?
+    isActive        Boolean  @default(false)
+    recoverPassword String?  @default(uuid())
+    verificationToken VerificationToken[]
+    person          Person   @relation(fields: [personId], references: [id])
+    personId        String   @unique
+    creationDate    DateTime
+    updateDate      DateTime
+    deletionDate    DateTime?
+
+    @@map("users")
+}
+
+model Address {
+    id                String  @id @default(uuid())
+    zipCode           String
+    addressLine       String
+    addressLineNumber String
+    neighborhood      String
+    city              String
+    state             String
+    person            Person @relation(fields: [personId], references: [id])
+    personId          String @unique
+    creationDate    DateTime
+    updateDate      DateTime
+    deletionDate    DateTime?
+    
+    @@map("addresses")
+}
+
+model Person {
+    id        String   @id @default(uuid())
+    firstName String
+    lastName  String
+    cpf       String
+    birthDate DateTime
+    phone     String
+    user      User?
+    address   Address?
+    creationDate    DateTime
+    updateDate      DateTime
+    deletionDate    DateTime?
+
+    @@map("persons")
+}
+
+model VerificationToken {
+  id               String   @id @default(uuid())
+  userId           String
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  confirmToken     String
+  expiresAt        DateTime
+  creationDate     DateTime
+  updateDate       DateTime
+  deletionDate     DateTime?
+
+  @@index([userId], name: "user_id_idx")
+}
+
+model Gabarito {
+  id           String   @id @default(uuid())
+  titulo       String
+  respostas    String   // JSON em string
+  configuracao String  // JSON em string (opcional)
+  usuarioId    String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+
